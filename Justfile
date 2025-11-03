@@ -4,7 +4,7 @@ run:
     poetry run python main.py run
 
 initdb *args:
-    poetry run python main.py initdb {{ args }}
+    poetry run python main.py initdb {{args}}
     poetry run alembic --config migrations/alembic.ini stamp head
 
 migrate:

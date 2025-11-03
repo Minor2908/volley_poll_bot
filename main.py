@@ -21,7 +21,20 @@ def wrap_echo(msg: str):
 
 
 @cli.command()
-def initdb(exist_ok: bool = False, drop_existing: bool = False):
+def initdb(
+    exist_ok: bool = typer.Option(
+        False,
+        "--exist-ok",
+        "-e",
+        help="Allow using an existing database if it already exists.",
+    ),
+    drop_existing: bool = typer.Option(
+        False,
+        "--drop-existing",
+        "-d",
+        help="Drop existing database before initializing a new one.",
+    ),
+):
     """Set up the database.
 
     Can be used to remove an existing database.
