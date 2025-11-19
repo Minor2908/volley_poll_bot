@@ -151,6 +151,8 @@ def handle_set_vote_count(
     elif poll.poll_type == PollType.cumulative_vote.name:
         error_message = i18n.t("creation.error.limit_bigger_zero", locale=user.locale)
 
+    elif poll.poll_type == PollType.ordered_vote.name:
+        error_message = i18n.t("creation.error.limit_bigger_zero", locale=user.locale)
     try:
         amount = int(text)
     except BaseException:

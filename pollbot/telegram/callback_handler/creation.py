@@ -152,7 +152,7 @@ def all_options_entered(session, context, poll):
         return
 
     locale = context.user.locale
-    if poll.poll_type in [PollType.limited_vote.name, PollType.cumulative_vote.name]:
+    if poll.poll_type in [PollType.limited_vote.name, PollType.cumulative_vote.name, PollType.ordered_vote.name]:
         message = context.query.message
         message.edit_text(i18n.t("creation.option.finished", locale=locale))
         context.user.expected_input = ExpectedInput.vote_count.name

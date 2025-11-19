@@ -45,7 +45,7 @@ class PollType(Enum):
     block_vote = 20
     limited_vote = 30
     cumulative_vote = 40
-
+    ordered_vote = 70
 
 @unique
 class ReferenceType(Enum):

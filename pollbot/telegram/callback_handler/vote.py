@@ -56,6 +56,8 @@ def handle_vote(
             update_poll = handle_doodle_vote(session, context, option)
         elif poll.poll_type == PollType.priority.name:
             update_poll = handle_priority_vote(session, context, option)
+        elif poll.poll_type == PollType.ordered.name:
+            update_poll = handle_volley_ordered_vote(session, context, option)
         else:
             raise Exception("Unknown poll type")
         session.commit()
@@ -409,5 +411,87 @@ def handle_priority_vote(
 
     registered = i18n.t("callback.vote.registered", locale=option.poll.locale)
     context.query.answer(registered)
+
+    return True
+
+
+
+def handle_volley_ordered_vote(
+    session: scoped_session,
+    context: CallbackContext,
+    option: Option,
+    limited: bool = True,
+) -> bool:
+    """Handle a ordered vote."""
+    locale = option.poll.locale
+    existing_vote = (
+        session.query(Vote)
+        .filter(Vote.option == option)
+        .filter(Vote.user == context.user)
+        .one_or_none()
+    )
+
+    vote_count = (
+        session.query(func.sum(Vote.vote_count))
+        .filter(Vote.poll == option.poll)
+        .filter(Vote.user == context.user)
+        .one()
+    )
+    vote_count = vote_count[0]
+    if vote_count is None:
+        vote_count = 0
+
+    action = context.callback_result
+    allowed_votes = 6
+    if limited:
+        allowed_votes = option.poll.number_of_votes
+
+    # Upvote, but no votes left
+    if limited and action == CallbackResult.yes and vote_count >= allowed_votes:
+        no_left = i18n.t("callback.vote.no_left", locale=locale)
+        respond_to_vote(session, no_left, context, option.poll)
+        return False
+
+    # Early return if downvote on non existing vote
+    if existing_vote is None and action == CallbackResult.no:
+        respond_to_vote(session, "Cannot downvote this option.", context, option.poll)
+        return False
+
+    if existing_vote:
+        # Add to an existing vote
+        if action == CallbackResult.yes:
+            existing_vote.vote_count += 1
+            session.flush()
+            remaining_votes = allowed_votes - (vote_count + 1)
+            vote_registered = i18n.t("callback.vote.registered", locale=locale)
+            respond_to_vote(
+                session, vote_registered, context, option.poll, remaining_votes, limited
+            )
+
+        # Remove from existing vote
+        elif action == CallbackResult.no:
+            existing_vote.vote_count -= 1
+
+            # Delete vote if necessary
+            if existing_vote.vote_count <= 0:
+                session.delete(existing_vote)
+
+            session.flush()
+            remaining_votes = allowed_votes - (vote_count - 1)
+            vote_removed = i18n.t("callback.vote.removed", locale=locale)
+            respond_to_vote(
+                session, vote_removed, context, option.poll, remaining_votes, limited
+            )
+
+    # Add new vote
+    elif existing_vote is None and action == CallbackResult.yes:
+        vote = Vote(context.user, option)
+        session.add(vote)
+        session.flush()
+        remaining_votes = allowed_votes - (vote_count + 1)
+        vote_registered = i18n.t("callback.vote.registered", locale=locale)
+        respond_to_vote(
+            session, vote_registered, context, option.poll, remaining_votes, limited
+        )
 
     return True

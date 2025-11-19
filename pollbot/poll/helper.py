@@ -95,6 +95,7 @@ def translate_poll_type(poll_type: str, locale: str) -> str:
         ),
         PollType.count_vote.name: i18n.t("poll_types.count_vote", locale=locale),
         PollType.priority.name: i18n.t("poll_types.priority", locale=locale),
+	PollType.ordered_vote.name: i18n.t("poll_types.ordered_vote", locale=locale),
     }
 
     return mapping[poll_type]
@@ -106,6 +107,7 @@ def poll_allows_multiple_votes(poll: Poll) -> bool:
         PollType.block_vote.name,
         PollType.limited_vote.name,
         PollType.cumulative_vote.name,
+	PollType.ordered_vote.name,
     ]
 
     return poll.poll_type in multiple_poll_types
@@ -116,6 +118,7 @@ def poll_has_limited_votes(poll: Poll) -> bool:
     poll_type_with_vote_count = [
         PollType.limited_vote.name,
         PollType.cumulative_vote.name,
+	PollType.ordered_vote.name,
     ]
 
     return poll.poll_type in poll_type_with_vote_count
@@ -123,4 +126,4 @@ def poll_has_limited_votes(poll: Poll) -> bool:
 
 def poll_allows_cumulative_votes(poll: Poll) -> bool:
     """Check whether this poll's type is cumulative."""
-    return poll.poll_type in [PollType.cumulative_vote.name, PollType.count_vote.name]
+    return poll.poll_type in [PollType.cumulative_vote.name, PollType.ordered_vote.name, PollType.count_vote.name]
