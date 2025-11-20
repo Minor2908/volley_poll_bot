@@ -6,6 +6,7 @@ poll_types:
     cumulative_vote: 'Cumulative vote'
     count_vote: 'Unlimited votes'
     priority: 'Priority Vote'
+    ordered_vote: 'Ordered vote'
 list:
     polls: 'Select a poll to manage'
     no_polls: 'You don''t own any open polls'

@@ -416,7 +416,7 @@ def handle_priority_vote(
 
 
 
-def handle_volley_ordered_vote(
+def handle_ordered_vote(
     session: scoped_session,
     context: CallbackContext,
     option: Option,
