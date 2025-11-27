@@ -480,10 +480,8 @@ def handle_ordered_vote(
             option=option,
             order=max_order + 1,
             )
-        session.add(new_vote)
-        session.flush()    
-
-
+            session.add(new_vote)
+            session.flush()    
 
         # Remove from existing vote
         elif action == CallbackResult.no:
@@ -505,7 +503,7 @@ def handle_ordered_vote(
                 .filter(Vote.option == option)
                 .order_by(Vote.order.desc())
                 .first()
-            )
+                )
             if last_vote:
                 session.delete(last_vote)
                 session.flush()
