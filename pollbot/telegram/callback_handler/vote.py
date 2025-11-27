@@ -460,28 +460,56 @@ def handle_ordered_vote(
     if existing_vote:
         # Add to an existing vote
         if action == CallbackResult.yes:
-            existing_vote.vote_count += 1
-            session.flush()
-            remaining_votes = allowed_votes - (vote_count + 1)
-            vote_registered = i18n.t("callback.vote.registered", locale=locale)
-            respond_to_vote(
-                session, vote_registered, context, option.poll, remaining_votes, limited
+            # existing_vote.vote_count += 1
+            # session.flush()
+            # remaining_votes = allowed_votes - (vote_count + 1)
+            # vote_registered = i18n.t("callback.vote.registered", locale=locale)
+            # respond_to_vote(
+            #     session, vote_registered, context, option.poll, remaining_votes, limited
+            # )
+            # Найти максимальную позицию
+            max_order = (
+            session.query(func.max(Vote.order))
+            .filter(Vote.poll == option.poll)
+            .filter(Vote.user == context.user)
+            .scalar()
+            ) or 0
+
+            new_vote = Vote(
+            user=context.user,
+            option=option,
+            order=max_order + 1,
             )
+        session.add(new_vote)
+        session.flush()    
+
+
 
         # Remove from existing vote
         elif action == CallbackResult.no:
-            existing_vote.vote_count -= 1
+            # existing_vote.vote_count -= 1
 
-            # Delete vote if necessary
-            if existing_vote.vote_count <= 0:
-                session.delete(existing_vote)
+            # # Delete vote if necessary
+            # if existing_vote.vote_count <= 0:
+            #     session.delete(existing_vote)
 
-            session.flush()
-            remaining_votes = allowed_votes - (vote_count - 1)
-            vote_removed = i18n.t("callback.vote.removed", locale=locale)
-            respond_to_vote(
-                session, vote_removed, context, option.poll, remaining_votes, limited
+            # session.flush()
+            # remaining_votes = allowed_votes - (vote_count - 1)
+            # vote_removed = i18n.t("callback.vote.removed", locale=locale)
+            # respond_to_vote(
+            #     session, vote_removed, context, option.poll, remaining_votes, limited
+            # )
+            last_vote = (
+                session.query(Vote)
+                .filter(Vote.user == context.user)
+                .filter(Vote.option == option)
+                .order_by(Vote.order.desc())
+                .first()
             )
+            if last_vote:
+                session.delete(last_vote)
+                session.flush()
+
 
     # Add new vote
     elif existing_vote is None and action == CallbackResult.yes:
