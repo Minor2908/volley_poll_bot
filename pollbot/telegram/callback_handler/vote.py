@@ -462,11 +462,11 @@ def handle_ordered_vote(
         if action == CallbackResult.yes:
             # existing_vote.vote_count += 1
             # session.flush()
-            # remaining_votes = allowed_votes - (vote_count + 1)
-            # vote_registered = i18n.t("callback.vote.registered", locale=locale)
-            # respond_to_vote(
-            #     session, vote_registered, context, option.poll, remaining_votes, limited
-            # )
+            remaining_votes = allowed_votes - (vote_count + 1)
+            vote_registered = i18n.t("callback.vote.registered", locale=locale)
+            respond_to_vote(
+                session, vote_registered, context, option.poll, remaining_votes, limited
+            )
             # Найти максимальную позицию
             max_order = (
             session.query(func.max(Vote.order))
@@ -492,11 +492,11 @@ def handle_ordered_vote(
             #     session.delete(existing_vote)
 
             # session.flush()
-            # remaining_votes = allowed_votes - (vote_count - 1)
-            # vote_removed = i18n.t("callback.vote.removed", locale=locale)
-            # respond_to_vote(
-            #     session, vote_removed, context, option.poll, remaining_votes, limited
-            # )
+            remaining_votes = allowed_votes - (vote_count - 1)
+            vote_removed = i18n.t("callback.vote.removed", locale=locale)
+            respond_to_vote(
+                 session, vote_removed, context, option.poll, remaining_votes, limited
+             )
             last_vote = (
                 session.query(Vote)
                 .filter(Vote.user == context.user)
